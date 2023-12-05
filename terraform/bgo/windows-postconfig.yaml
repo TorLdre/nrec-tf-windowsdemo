@@ -1,0 +1,28 @@
+#ps1_sysnative
+## Define clear text string for username and password
+#[string]$userName = 'domain\Account'
+#[string]$userPassword = 'OurServiceAccountPwd'
+
+## Convert to SecureString and create credential
+#[securestring]$secStringPassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
+#[pscredential]$credObject = New-Object System.Management.Automation.PSCredential ($userName, $secStringPassword)
+
+# Set UiB specific DNS servers so that the klient domain actually works
+Get-NetAdapter | Set-DnsClientServerAddress -ServerAddress ('129.177.14.39','129.177.14.40')
+
+# Leave a token as a proof of cloudbase-init execution
+New-Item C:\Users\Admin\Desktop\terraform.txt
+Set-Content C:\Users\Admin\Desktop\terraform.txt 'Cloudbase-init was here.'
+
+## Disable IPv6 for the UiB windows usecase
+#Disable-NetAdapterBinding -Name "*" -ComponentID ms_tcpip6
+
+## If you have defined credentials
+#add-computer -domainname "klient.uib.no" -Credential $credObject -OUPath "OU=GEOGEOG,OU=NREC,OU=TerminalServer,OU=IT,OU=Servere,DC=klient,DC=uib,DC=no"
+
+## The computer object needs to be a member of an execution group in order to allow RDP connections
+#Install-WindowsFeature RSAT-AD-PowerShell
+#Add-ADGroupMember -Identity NREC-Allow-RDP -Members $env:computername$ -Credential $credObject
+
+## only if the server has become a domain member
+#Restart-Computer
