@@ -1,4 +1,13 @@
 #ps1_sysnative
+
+$Logfile = "C:\Users\Admin\cloudinit-userlog.txt"
+function WriteLog {
+  Param ([string]$LogString)
+  $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
+  $LogMessage = "$Stamp $LogString"
+  Add-content $LogFile -value $LogMessage
+}
+
 ## Define clear text string for username and password
 #[string]$userName = 'domain\Account'
 #[string]$userPassword = 'OurServiceAccountPwd'
@@ -7,12 +16,23 @@
 #[securestring]$secStringPassword = ConvertTo-SecureString $userPassword -AsPlainText -Force
 #[pscredential]$credObject = New-Object System.Management.Automation.PSCredential ($userName, $secStringPassword)
 
+# Initialize and format volumes
+$disks = Get-Disk | Select-Object Number, IsOffline, SerialNumber | Where-Object IsOffline -EQ $True
+foreach ($item in $disks) {
+  Get-Disk -Number $disks.Number | Set-Disk -IsOffline $False
+  Initialize-Disk -Number $disks.Number -PartitionStyle GPT
+  New-Partition -DiskNumber $disks.Number -AssignDriveLetter -UseMaximumSize | Format-Volume
+  $LogMessage = (echo ("A drive with serial number " + $disks.SerialNumber +" was initialized and formatted."))
+  WriteLog $LogMessage
+}
+
 # Set UiB specific DNS servers so that the klient domain actually works
 Get-NetAdapter | Set-DnsClientServerAddress -ServerAddress ('129.177.14.39','129.177.14.40')
+WriteLog "Changed DNS servers"
 
 # Leave a token as a proof of cloudbase-init execution
-New-Item C:\Users\Admin\Desktop\terraform.txt
-Set-Content C:\Users\Admin\Desktop\terraform.txt 'Cloudbase-init was here.'
+#New-Item C:\Users\Admin\Desktop\terraform.txt
+#Set-Content C:\Users\Admin\Desktop\terraform.txt 'Cloudbase-init was here.'
 
 ## Disable IPv6 for the UiB windows usecase
 #Disable-NetAdapterBinding -Name "*" -ComponentID ms_tcpip6

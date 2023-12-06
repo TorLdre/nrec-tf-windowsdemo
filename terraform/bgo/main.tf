@@ -14,9 +14,9 @@ module "node" {
   allow_rdp_from_v6 = ["2001:700:200::/56"]
   allow_rdp_from_v4 = ["129.177.0.0/16"]
   network           = "uib-dualStack"
-  flavor            = "win.medium"
+  flavor            = "win.large"
   image_name        = "GOLD Windows Server 2022 Standard"
   image_user        = "Admin"
-  volume_size       = 0
+  volume_size       = 20
   user_data         = "windows-postconfig.yaml"
 }
