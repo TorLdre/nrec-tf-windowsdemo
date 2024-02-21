@@ -20,3 +20,23 @@ module "node" {
   volume_size       = 20
   user_data         = "windows-postconfig.yaml"
 }
+
+module "linux_vm" {
+  source = "git@github.com:TorLdre/tf-nrec-node.git?ref=mods"
+
+  name              = "linux_vm"
+  node_name         = "linux_vm-"
+  # Enable this to create and update fqdn in NREC
+  zone_name         = "win.uib.no"
+  domain            = "demo.win.uib.no"
+  region            = "bgo"
+  node_count        = 2
+  ssh_public_key    = "~/.ssh/id_rsa.pub"
+  allow_ssh_from_v6 = ["2001:700:200::/48"]
+  allow_ssh_from_v4 = ["129.177.0.0/16"]
+  network           = "IPv6"
+  flavor            = "m1.small"
+  image_name        = "GOLD Alma Linux 9"
+  image_user        = "almalinux"
+  volume_size       = 0
+}
